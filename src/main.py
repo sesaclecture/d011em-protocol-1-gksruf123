@@ -25,8 +25,12 @@ def blink_led() -> None:
     - 종료시 LED는 OFF 상태
     """
     # TODO: blink_led 구현
-
-    raise NotImplementedError
+    led = LED(18)
+    for i in range(10):
+        led.on()
+        time.sleep(1)
+        led.off()
+        time.sleep(1)
 
 
 def check_to_input_button() -> None:
@@ -39,8 +43,17 @@ def check_to_input_button() -> None:
     - 버튼 입력을 10번 받았으면 종료.
     """
     # TODO: check_to_input_button 구현
+    btn = Button(18, pull_up=True)
+    count = 0
+    prev_state = "released"
 
-    raise NotImplementedError
+    while count < 20:
+        state = "pressed" if btn.is_pressed else "released"
+        if state != prev_state:
+            print(state)
+            prev_state = state
+            count += 1
+        time.sleep(0.01)
 
 
 def blink_led_through_button() -> None:
@@ -54,9 +67,27 @@ def blink_led_through_button() -> None:
     """
     # TODO: blink_led_through_button 구현
     led = LED(12)
-    led.on()
+    btn = Button(13, pull_up=True)
+    prev_state = "released"
+    count = 0
 
-    raise NotImplementedError
+    while count < 1:
+        if btn.is_pressed:
+            led.on()
+            time.sleep(0.5)
+            led.off()
+            time.sleep(0.5)
+            if prev_state != "pressed":
+                count += 1
+                prev_state = "pressed"
+        else:
+            led.off()
+            if prev_state != "released":
+                count += 1
+                prev_state = "released"
+        time.sleep(0.01)
+
+    led.off()
 
 
 def transmit_msg() -> None:
@@ -66,8 +97,12 @@ def transmit_msg() -> None:
     - 개행을 붙여 전송 (수신/테스트 편의)
     """
     # TODO: blink_led_through_button 구현
+    ser = Serial("/dev/ttyAMA3", baudrate=115200, timeout=1.0)
+    for i in range(10):
+        msg = f"Hello World! {i}\n"
+        ser.write(msg.encode())
+    ser.close()
 
-    raise NotImplementedError
 
 
 def receive_msg() -> None:
@@ -76,8 +111,22 @@ def receive_msg() -> None:
     - 'exit' (대소문자 무시) 라인을 수신하면 함수 종료
     """
     # TODO: blink_led_through_button 구현
+    ser = Serial("/dev/ttyAMA3", baudrate=115200, timeout=1.0)
+    buffer = b""
+    while True:
+        b = ser.read(1)
+        if not b:
+            continue
+        buffer += b
+        if b == b"\n":
+            line = buffer.decode().strip()
+            print(line)
+            if line.lower() == "exit":
+                break
+            buffer = b""
 
-    raise NotImplementedError
+    ser.close()
+
 
 
 if __name__ == "__main__":
